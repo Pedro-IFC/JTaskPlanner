@@ -1,9 +1,14 @@
 package timer;
 
+import java.util.Calendar;
+
+import cron.CronExpression;
+
 public class Timer {
 	private int time;
 	private boolean repeat;
 	private int repTimes=-1;
+	private CronExpression cron;
 	public Timer interval(int sec) {
 		this.time=sec;
 		return this;
@@ -34,5 +39,19 @@ public class Timer {
 	}
 	public void setRepTimes(int repTimes) {
 		this.repTimes = repTimes;
+	}
+	public Timer cron(String cronExp) {
+        CronExpression cron = new CronExpression(cronExp);
+        this.setCron(cron);
+        return this;
+	}
+	public boolean matchTime() {
+		return (cron==null)?true:cron.matches(Calendar.getInstance());
+	}
+	public CronExpression getCron() {
+		return cron;
+	}
+	public void setCron(CronExpression cron) {
+		this.cron = cron;
 	}
 }

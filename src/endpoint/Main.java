@@ -1,6 +1,6 @@
 package endpoint;
 
-import planner.Planner;
+import planner.PlanBuilder;
 import trigger.Trigger;
 import trigger.TriggerBuilder;
 import task.Task;
@@ -9,7 +9,7 @@ import timer.TimerBuilder;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		Trigger trigger = TriggerBuilder.newTrigger()
 			.rename("1 sec")
 			.start()
@@ -18,22 +18,36 @@ public class Main {
 				.interval(1000)
 				.repeat(3)
 			);
+		Trigger trigger2 = TriggerBuilder.newTrigger()
+				.rename("2 sec")
+				.start()
+				.when(
+					TimerBuilder.newTimer()
+					.interval(3000)
+					.repeat(3)
+				);
 		Task task = TaskBuilder.newTask()
-			.rename("Tarefa 01")
+			.rename("Cron")
 			.setTask(new TarefaTeste());
+
+		PlanBuilder.newPlanner()
+			.setOutput("/home/pedro/")
+			.planTask(trigger, task)
+			.start();
 		
-		Planner plan = new Planner();
-		plan.setOutput("C:\\Users\\Pedro\\Documents");
-		plan.cron("1 * * * *", task);
-		plan.start();
+//		PlanBuilder.newPlanner()
+//			.setOutput("/home/pedro/")
+//			.cron("1 * * * *", task)
+//			.start();
 		
-		System.out.println("Aqui roda normal");
-		
-		Planner plan2 = new Planner();
-		plan2.setOutput("C:\\Users\\Pedro\\Documents");
-		plan2.planTask(trigger, task);
-		plan2.start();
-		//fazer com planBuilder pq aí dá de usar assyncFunc
+
+		Task task2 = TaskBuilder.newTask()
+				.rename("Timer")
+				.setTask(new TarefaTeste2());
+		PlanBuilder.newPlanner()
+			.setOutput("/home/pedro/")
+			.planTask(trigger2, task2)
+			.start();
 	}
 
 }

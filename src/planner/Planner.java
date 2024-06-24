@@ -2,7 +2,6 @@ package planner;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -21,8 +20,9 @@ public class Planner {
     public String getOutput() {
         return output;
     }
-    public void setOutput(String output) {
+    public Planner setOutput(String output) {
         this.output = output;
+        return this;
     }
 
     public Trigger getTrigger() {
@@ -48,20 +48,11 @@ public class Planner {
     }
 
     public Planner cron(String cronExp, Task task) {
-    	List<String> cronFields = Arrays.asList(cronExp.split(" "));
-        if (cronFields.size() != 5) {
-        	 throw new IllegalArgumentException("Expressão cron inválida");
-        }
-        int min = (cronFields.get(0).equals("*"))?0:Integer.parseInt(cronFields.get(0))*60000;
-        int hour = (cronFields.get(1).equals("*"))?0:Integer.parseInt(cronFields.get(1))*3600000;
-        int day = (cronFields.get(2).equals("*"))?0:Integer.parseInt(cronFields.get(2))*86400000;
-        int month = (cronFields.get(3).equals("*"))?0:Integer.parseInt(cronFields.get(3))*86400000*31;
-        int dayWeek = (cronFields.get(4).equals("*"))?0:Integer.parseInt(cronFields.get(4))*604800000;
-        int total = min+hour+day+month+dayWeek;
     	Trigger trigger = TriggerBuilder.newTrigger()
     		.rename("Cron")
     		.when(TimerBuilder.newTimer()
-    			.interval(total)
+    			.interval(30000)
+    			.cron(cronExp)
     			.repeat());
         this.trigger = trigger;
         this.task = task;
@@ -69,20 +60,15 @@ public class Planner {
     }
 
     public void start() {
-        try {
             if (this.trigger.getTimer().isRepeat()) {
-                CompletableFuture<Void> future = asyncFunction(task);
-            	future.get(); 
+                asyncFunction(task);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
     }
     public CompletableFuture<Void> asyncFunction(Task task) {
         return CompletableFuture.runAsync(() -> {
         	if (this.trigger.getTimer().getRepTimes() >= 0) {
                 for (int i = 0; i < this.trigger.getTimer().getRepTimes(); i++) {
-                	if(this.trigger.isRun()) {
+                	if(this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                 	}
@@ -93,7 +79,7 @@ public class Planner {
     						e.printStackTrace();
     					}
                     }
-                    if(!this.trigger.isRun()) {
+                    if(!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                     }
@@ -105,7 +91,7 @@ public class Planner {
                 }
             } else {
                 while (true) {
-                	if(this.trigger.isRun()) {
+                	if(this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                 	}
@@ -114,7 +100,7 @@ public class Planner {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-                    if(!this.trigger.isRun()) {
+                    if(!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                     }
