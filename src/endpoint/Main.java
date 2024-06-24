@@ -33,6 +33,7 @@ public class Main {
 		plan2.setOutput("C:\\Users\\Pedro\\Documents");
 		plan2.planTask(trigger, task);
 		plan2.start();
+		//fazer com planBuilder pq aí dá de usar assyncFunc
 	}
 
 }
