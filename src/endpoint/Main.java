@@ -1,5 +1,7 @@
 package endpoint;
 
+import java.util.Calendar;
+
 import planner.PlanBuilder;
 import trigger.Trigger;
 import trigger.TriggerBuilder;
@@ -12,7 +14,6 @@ public class Main {
 	public static void main(String[] args) throws InterruptedException {
 		Trigger trigger = TriggerBuilder.newTrigger()
 			.rename("1 sec")
-			.start()
 			.when(
 				TimerBuilder.newTimer()
 				.interval(1000)
@@ -20,7 +21,6 @@ public class Main {
 			);
 		Trigger trigger2 = TriggerBuilder.newTrigger()
 				.rename("2 sec")
-				.start()
 				.when(
 					TimerBuilder.newTimer()
 					.interval(3000)
@@ -30,24 +30,25 @@ public class Main {
 			.rename("Cron")
 			.setTask(new TarefaTeste());
 
-		PlanBuilder.newPlanner()
-			.setOutput("/home/pedro/")
-			.planTask(trigger, task)
-			.start();
-		
 //		PlanBuilder.newPlanner()
 //			.setOutput("/home/pedro/")
-//			.cron("1 * * * *", task)
+//			.planTask(trigger, task)
 //			.start();
 		
-
-		Task task2 = TaskBuilder.newTask()
-				.rename("Timer")
-				.setTask(new TarefaTeste2());
 		PlanBuilder.newPlanner()
 			.setOutput("/home/pedro/")
-			.planTask(trigger2, task2)
+			.cron("5 13 * * *", task)
 			.start();
+
+//		Task task2 = TaskBuilder.newTask()
+//				.rename("Timer")
+//				.setTask(new TarefaTeste2());
+//		PlanBuilder.newPlanner()
+//			.setOutput("/home/pedro/")
+//			.planTask(trigger2, task2)
+//			.start();
+		
+		PlanBuilder.keepRunning();
 	}
 
 }

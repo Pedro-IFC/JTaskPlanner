@@ -11,4 +11,19 @@ public class PlanBuilder {
 		plans.add(n);
 		return n;
 	}
+	public static void keepRunning() throws InterruptedException {
+		int totalTime=0;
+		boolean infinite=false;
+		for(int i=0; i<plans.size(); i++) {
+			if(plans.get(i).getTrigger().getTimer().getRepTimes()<0) {
+				infinite=true;
+			}else {
+				totalTime+=plans.get(i).getTrigger().getTimer().getRepTimes()*plans.get(i).getTrigger().getTimer().getTime();
+			}
+		}
+		while(infinite) {
+			Thread.sleep(100000);
+		}
+		Thread.sleep(totalTime);
+	}
 }

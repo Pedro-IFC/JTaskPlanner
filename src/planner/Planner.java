@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import task.Task;
 import timer.TimerBuilder;
 import trigger.Trigger;
@@ -50,10 +49,12 @@ public class Planner {
     public Planner cron(String cronExp, Task task) {
     	Trigger trigger = TriggerBuilder.newTrigger()
     		.rename("Cron")
+    		.start()
     		.when(TimerBuilder.newTimer()
-    			.interval(30000)
+    			.interval(60000)
     			.cron(cronExp)
-    			.repeat());
+    			.repeat()
+    		);
         this.trigger = trigger;
         this.task = task;
         return this;
@@ -72,13 +73,11 @@ public class Planner {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                 	}
-                    if( i < this.trigger.getTimer().getRepTimes()-1) {
-                    	try {
-    						Thread.sleep(this.trigger.getTimer().getTime());
-    					} catch (InterruptedException e) {
-    						e.printStackTrace();
-    					}
-                    }
+                	try {
+						Thread.sleep(this.trigger.getTimer().getTime());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
                     if(!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
