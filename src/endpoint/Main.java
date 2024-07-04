@@ -35,6 +35,7 @@ public class Main {
 //			.planTask(trigger, task)
 //			.start();
 		
+<<<<<<< Updated upstream
 		PlanBuilder.newPlanner()
 			.setOutput("/home/pedro/")
 			.cron("5 13 * * *", task)
@@ -49,6 +50,22 @@ public class Main {
 //			.start();
 		
 		PlanBuilder.keepRunning();
+=======
+		Planner plan = new Planner();
+		Planner plan2 = new Planner();
+		
+		System.out.println("Start ");
+		plan2.setOutput("C:\\Users\\Pedro\\Documents");
+		plan2.planTask(trigger, task);
+		plan2.start();
+		System.out.println("Print");
+		
+		plan.setOutput("C:\\Users\\Pedro\\Documents");
+		plan.cron("12 * * * *", task);
+		plan.start();
+		
+		System.out.println("End ");
+>>>>>>> Stashed changes
 	}
 
 }
