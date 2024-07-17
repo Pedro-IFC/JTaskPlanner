@@ -21,9 +21,9 @@ public class PlanBuilder {
 				totalTime+=plans.get(i).getTrigger().getTimer().getRepTimes()*plans.get(i).getTrigger().getTimer().getTime();
 			}
 		}
+		Thread.sleep(totalTime);
 		while(infinite) {
 			Thread.sleep(100000);
 		}
-		Thread.sleep(totalTime);
 	}
 }

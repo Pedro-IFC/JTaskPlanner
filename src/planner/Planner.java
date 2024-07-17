@@ -61,9 +61,9 @@ public class Planner {
     }
 
     public void start() {
-            if (this.trigger.getTimer().isRepeat()) {
-                asyncFunction(task);
-            }
+        if (this.trigger.getTimer().isRepeat()) {
+            asyncFunction(task);
+        }
     }
     public CompletableFuture<Void> asyncFunction(Task task) {
         return CompletableFuture.runAsync(() -> {
@@ -74,15 +74,20 @@ public class Planner {
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                 	}
                 	try {
-						Thread.sleep(this.trigger.getTimer().getTime());
+                		Thread.sleep(this.trigger.getTimer().getTime());
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						this.logs.add(e.toString());
 					}
                     if(!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        task.getTaskDetail().execute();
-                        this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
-                    }
-                	try (FileWriter fileWriter = new FileWriter(this.getOutput()+"/" + this.getTrigger().getName() + "-" + this.task.getName()+".json")) {
+                        try {
+                        	task.getTaskDetail().execute();
+	                        this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
+                        }catch(Exception e) {
+                        	this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
+                        }
+                    } 
+                    try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
                         fileWriter.write(this.logs.toString());
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -94,16 +99,22 @@ public class Planner {
                         task.getTaskDetail().execute();
                         this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
                 	}
-                    try {
-						Thread.sleep(this.trigger.getTimer().getTime());
+                	try {
+                		Thread.sleep(this.trigger.getTimer().getTime());
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						this.logs.add(e.toString());
 					}
                     if(!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        task.getTaskDetail().execute();
-                        this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
+                        try { 
+                        	task.getTaskDetail().execute();
+                        	this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
+                        }catch(Exception e) {
+                        	e.printStackTrace();
+                        	this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
+                        }
                     }
-                	try (FileWriter fileWriter = new FileWriter(this.getOutput()+"/" + this.getTrigger().getName() + "-" + this.task.getName()+".json")) {
+                    try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
                         fileWriter.write(this.logs.toString());
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -112,4 +123,32 @@ public class Planner {
             }
         });
     }
+
+    private void executarTarefa() {
+        if (this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
+            try {
+                task.getTaskDetail().execute();
+                this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
+            } catch (Exception e) {
+                this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
+            }
+        }
+        try {
+            Thread.sleep(this.trigger.getTimer().getTime());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            this.logs.add(e.toString());
+        }
+
+        salvarLogs();
+    }
+
+    private void salvarLogs() {
+        try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
+            fileWriter.write(this.logs.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
