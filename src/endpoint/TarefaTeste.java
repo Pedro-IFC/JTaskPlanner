@@ -3,10 +3,10 @@ package endpoint;
 import task.TaskDetail;
 
 public class TarefaTeste implements TaskDetail{
+	private int i =0;
 	@Override
 	public void execute() {
-		System.out.println("Teste Com erro . . .  ");
-        int[] array = {1, 2, 3};
-        System.out.println(array[5]);
+		System.out.println("Teste script - " + i );
+		i++;
 	}
 }

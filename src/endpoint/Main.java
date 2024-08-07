@@ -1,6 +1,5 @@
 package endpoint;
 
-import java.util.Calendar;
 
 import planner.PlanBuilder;
 import trigger.Trigger;
@@ -12,24 +11,28 @@ import timer.TimerBuilder;
 public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
-		
-		
-		Trigger trigger2 = TriggerBuilder.newTrigger()
-				.rename("New")
+		Trigger trigger = TriggerBuilder.newTrigger()
+				.rename("Nova tarefa")
 				.when(
 					TimerBuilder.newTimer()
 					.interval(1000)
 					.repeat(10)
 				);
+		
 		Task task = TaskBuilder.newTask()
-			.rename("Task")
+			.rename("Tarefa de teste 1sec")
 			.setTask(new TarefaTeste());
 
+		System.out.println("Inicio");
+		
 		PlanBuilder.newPlanner()
-			.setOutput("./")
-			.planTask(trigger2, task)
-			.start();
-		System.out.println("teste");
+		.setOutput("./")
+		.planTask(trigger, task)
+		.start();
+		
+		System.out.println("Entre script ");
+		System.out.println("Entre script de novo");
+		
 		PlanBuilder.keepRunning();
 	}
 
