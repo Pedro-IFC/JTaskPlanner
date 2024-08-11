@@ -38,7 +38,6 @@ public class CronExpression {
         this.month = fields[3];
         this.dayOfWeek = fields[4];
     }
-
     /**
      * Verifica se a data fornecida corresponde à expressão cron.
      *
@@ -72,5 +71,20 @@ public class CronExpression {
             }
             return false;
         }
+    }
+    public CronExpression convert() {
+    	if(!this.month.equals("*")) {
+    		this.dayOfMonth=this.dayOfMonth.equals("*")?"1":this.dayOfMonth;
+    	}
+    	if(!this.dayOfWeek.equals("*")) {
+    		this.hour=this.hour.equals("*")?"0":this.hour;
+    	}
+    	if(!this.dayOfMonth.equals("*")) {
+    		this.hour=this.hour.equals("*")?"0":this.hour;
+    	}
+    	if(!this.hour.equals("*")) {
+    		this.minute=this.minute.equals("*")?"0":this.minute;
+    	}
+    	return this;
     }
 }

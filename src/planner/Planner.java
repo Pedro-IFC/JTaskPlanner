@@ -2,6 +2,7 @@ package planner;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import task.Task;
@@ -28,7 +29,6 @@ public class Planner {
     private List<String> logs = new ArrayList<>();
     private Trigger trigger;
     private Task task;
-
     /**
      * Obtém o diretório de saída dos logs.
      *
@@ -107,18 +107,18 @@ public class Planner {
      */
     public Planner cron(String cronExp, Task task) {
         Trigger trigger = TriggerBuilder.newTrigger()
-                                        .rename("Cron")
-                                        .start()
-                                        .when(TimerBuilder.newTimer()
-                                                          .interval(60000)
-                                                          .cron(cronExp)
-                                                          .repeat()
-                                        );
+            .rename("Cron")
+            .start()
+            .when(
+            	TimerBuilder.newTimer()
+	            	.interval(60000)
+	            	.cron(cronExp)
+	            	.repeat()
+            );
         this.trigger = trigger;
         this.task = task;
         return this;
     }
-
     /**
      * Inicia a execução da tarefa planejada de forma assíncrona.
      */
@@ -136,57 +136,42 @@ public class Planner {
      */
     public CompletableFuture<Void> asyncFunction(Task task) {
         return CompletableFuture.runAsync(() -> {
-            if (this.trigger.getTimer().getRepTimes() >= 0) {
-                for (int i = 0; i < this.trigger.getTimer().getRepTimes(); i++) {
-                    if (this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        task.getTaskDetail().execute();
-                        this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
-                    }
-                    try {
-                        Thread.sleep(this.trigger.getTimer().getTime());
-                    } catch (InterruptedException e) {
-                        this.logs.add(e.toString());
-                    }
-                    if (!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        try {
-                            task.getTaskDetail().execute();
-                            this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
-                        } catch (Exception e) {
-                            this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
-                        }
-                    }
-                    try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
-                        fileWriter.write(this.logs.toString());
-                    } catch (IOException e) {
-                        this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
-                    }
+
+            int repTimes = this.trigger.getTimer().getRepTimes();
+            int iterationCount = repTimes >= 0 ? repTimes : Integer.MAX_VALUE;
+
+            for (int i = 0; i < iterationCount; i++) {
+                executeTask();
+                try {
+                    Thread.sleep(this.trigger.getTimer().getTime()-(
+                    		Calendar.getInstance().get(Calendar.SECOND)*1000+
+                    		Calendar.getInstance().get(Calendar.MILLISECOND)
+                		));
+                } catch (InterruptedException e) {
+                    this.logs.add(e.toString());
                 }
-            } else {
-                while (true) {
-                    if (this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        task.getTaskDetail().execute();
-                        this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
-                    }
-                    try {
-                        Thread.sleep(this.trigger.getTimer().getTime());
-                    } catch (InterruptedException e) {
-                        this.logs.add(e.toString());
-                    }
-                    if (!this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
-                        try {
-                            task.getTaskDetail().execute();
-                            this.logs.add(LocalDateTime.now().toString() + " - " + trigger.getName() + ":" + task.getName() + "\n");
-                        } catch (Exception e) {
-                            this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
-                        }
-                    }
-                    try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
-                        fileWriter.write(this.logs.toString());
-                    } catch (IOException e) {
-                        this.logs.add(LocalDateTime.now().toString() + " - " + e.toString() + "\n");
-                    }
-                }
+                writeLogsToFile();
+            	this.getTrigger().getTimer().getCron().convert();
             }
         });
     }
+    private void executeTask() {
+        if (this.trigger.isRun() && this.trigger.getTimer().matchTime()) {
+            try {
+                task.getTaskDetail().execute();
+                this.logs.add(LocalDateTime.now() + " - " + trigger.getName() + ":" + task.getName() + "\n");
+            } catch (Exception e) {
+                this.logs.add(LocalDateTime.now() + " - " + e.toString() + "\n");
+            }
+        }
+    }
+
+    private void writeLogsToFile() {
+        try (FileWriter fileWriter = new FileWriter(this.getOutput() + "/" + this.getTrigger().getName() + "-" + this.task.getName() + ".json")) {
+            fileWriter.write(this.logs.toString());
+        } catch (IOException e) {
+            this.logs.add(LocalDateTime.now() + " - " + e.toString() + "\n");
+        }
+    }
+
 }
