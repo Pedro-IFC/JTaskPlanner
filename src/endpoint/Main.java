@@ -20,18 +20,16 @@ public class Main {
 				);
 		
 		Task task = TaskBuilder.newTask()
-			.rename("Tarefa de teste 1sec")
+			.rename("Tarefa de teste 18h mes 8")
 			.setTask(new TarefaTeste());
 
 		System.out.println("Inicio");
 		
 		PlanBuilder.newPlanner()
-		.setOutput("./")
-		.planTask(trigger, task)
-		.start();
+			.setOutput("./")
+			.cron("* 9 * * *", task)
+			.start();
 		
-		System.out.println("Entre script ");
-		System.out.println("Entre script de novo");
 		
 		PlanBuilder.keepRunning();
 	}
