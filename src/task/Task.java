@@ -64,4 +64,13 @@ public class Task {
         this.taskdetail = task;
         return this;
     }
+
+	public Task(TaskDetail taskdetail) {
+		super();
+		this.taskdetail = taskdetail;
+	}
+	public Task() {
+		super();
+	}
+    
 }

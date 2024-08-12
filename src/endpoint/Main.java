@@ -23,7 +23,10 @@ public class Main {
 			.rename("Tarefa de teste 18h mes 8")
 			.setTask(new TarefaTeste());
 
-		System.out.println("Inicio");
+		PlanBuilder.newPlanner()
+		.setOutput("./")
+		.planTask(trigger, task)
+		.start();
 		
 		PlanBuilder.newPlanner()
 			.setOutput("./")
